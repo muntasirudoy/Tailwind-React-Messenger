@@ -7,7 +7,6 @@ import { getDatabase, ref, set,onValue,update,push,child } from 'firebase/databa
 import ScreenLoader from '../../components/common/ScreenLoader'
 import {
   getAuth,
-  onAuthStateChanged
 } from 'firebase/auth'
 
 import uuid from 'react-uuid';
@@ -21,7 +20,7 @@ const ALL_Friends = () => {
   const [loading, setLoading] = useState(false)
   const [sendRequest, setSendRequest] = useState(false)
   const [followers, setFollowers] = useState([])
-  const[btn1, setBtn1]  =useState([])
+  const[btn1, setBtn1]  =useState('')
 
   useEffect(() => {
     setLoading(true)
@@ -30,6 +29,7 @@ const ALL_Friends = () => {
       let users = []
       snapshot.forEach((item) => {
              if(item.key != auth.currentUser.uid){
+              console.log(item.val());
                   let obj = {
                     id:item.key,
                     username:item.val().username,
@@ -39,7 +39,6 @@ const ALL_Friends = () => {
               users.push(obj)
              }
       })
-
       setLoading(false)
       setFriends(users)
     }
@@ -51,8 +50,7 @@ const ALL_Friends = () => {
       let users = []
 
       snapshot.forEach((item)=>{
-
-        users.push(item.val().request_receiver_id + item.val().request_sender_id)
+        users.push(item.val())
       })
       setFollowers(users)
     })
@@ -65,8 +63,8 @@ const ALL_Friends = () => {
 
 
 
-
 const addRequest =(data)=>{
+setBtn1(data.id)
   const generateUid = uuid()
       set(ref(db, 'Friends_Request/' + generateUid), {
         uid:generateUid,
@@ -80,17 +78,18 @@ const addRequest =(data)=>{
         setSendRequest(true)
       })
 
+}
 
 
-} 
+
+console.log(friends);
+
 
 
 const actionTwo =()=>{
 
 }
-const actionThree =()=>{
 
-}
   return (
     <div className="main_body">
       <div className="right_shape"></div>
@@ -103,25 +102,20 @@ const actionThree =()=>{
           {loading ? (
             <ScreenLoader />
           ) : friends ? (
-            friends.map((data,index,arr) => (
+            friends.map((data,index) => (
               <Single_Card
                 key={index}
                 data={data}
-                btn1={followers && (followers.includes(data.id+auth.currentUser.uid || auth.currentUser.uid+data.id)) ? "Cancel Request" : "Add Request"}
+                btn1="Add Request"
                 btn2="View Profile"
                 action = {addRequest}
                 actionTwo ={actionTwo}
-                actionThree ={actionThree}
                 sendRequest={sendRequest}
               />
             ))
           ) : (
             'No Friends is found!'
           )}
-
-
-
-
         </div>
       </div>
     </div>
